@@ -1,0 +1,35 @@
+---
+comments: false
+page-layout: full
+
+execute:
+  echo: false
+
+about:
+  template: jolla
+  links:
+    - icon: linkedin
+      href: "https://linkedin.com/in/efrikin"
+      text: LinkedIn
+    - icon: github
+      href: "https://github.com/efrikin"
+      text: GitHub
+---
+
+# {{< fa hand >}} [Hi there!]{.primary}
+<h5>{{< fa user >}} My name is {{< meta authorname >}}.
+
+{{< fa laptop >}} I have been in IT for more than ten years.
+
+{{< fa person-digging >}} My career started as a System Administrator.
+
+{{< fa phone >}} After that I worked as a Site Reliability Engineer about three years
+
+{{< fa magnifying-glass >}} Then I worked in Research and Development team for about four years
+
+{{< fa cloud >}} I was researching hot topics related to performance large-scale clusters in cloud technologies area.
+
+{{< fa layer-group >}} I’m good at different infrastructure levels from IaaS to SaaS and also I'm a big fan of Everything as Code.
+
+{{< fa heart >}} I like OpenStack, Kubernetes, Fedora, GitLab, Ansible, Golang, Python and my hobby is long distance running {{< fa face-smile >}}</h3>
+

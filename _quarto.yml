@@ -1,0 +1,67 @@
+authorname: Evgenii Frikin
+
+draft: false
+
+project:
+  type: website
+  # resources:
+
+execute:
+  freeze: auto
+
+title-meta: "EF"
+description-meta: "Personal blog"
+
+website:
+  title: "EF"
+  description: "Personal blog"
+  # favicon: images/favicon.png
+  site-url: "https://{{< env GITHUB_REPOSITORY_OWNER >}}.github.io"
+  repo-url: "{{< env GITHUB_SERVER_URL >}}/{{< env GITHUB_REPOSITORY >}}"
+  repo-branch: main
+  page-navigation: true
+
+  open-graph: true
+  twitter-card: false
+
+  # bread-crumbs: true
+  # repo-actions: issue
+  # image: images/logo.png
+  navbar:
+    pinned: true
+    title: "&nbsp;&nbsp;{{< meta authorname >}}<span class='icon-line'></span>My Reflections"
+    left:
+      - text: personal blog
+
+  search:
+    location: navbar
+    type: textbox
+    copy-button: true
+
+  page-footer:
+    center: |
+      <span class="faux-block">{{< fa brands creative-commons-share >}} {{< env QUARTO__CURRENT_YEAR >}} {{< meta authorname >}}</span><br>
+      <span class="faux-block"><a href='{{< env GITHUB_SERVER_URL >}}/{{< env GITHUB_REPOSITORY >}}'> {{< fa brands github >}} {{< env GITHUB_SHA >}}</a></span>
+    border: false
+format:
+  html:
+    theme: themes/dark.scss
+      # light: assets/ek-theme-light.scss
+      # dark: assets/ek-theme-dark.scss
+    css:
+      - themes/custom.css
+    code-block-border-left: true
+    # highlight-style:
+      # light:
+      # dark:
+    smooth-scroll: true
+    link-external-newwindow: true
+    toc: false
+    anchor-sections: true
+    fig-cap-location: margin
+    reference-location: margin
+    footnotes-hover: true
+    include-in-header: _includes/seo.html
+
+editor: source
+
