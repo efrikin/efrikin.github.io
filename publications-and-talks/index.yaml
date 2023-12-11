@@ -1,0 +1,19 @@
+---
+- title: "Kubernetes cluster. Testing Performance and Scalability"
+  descriptions: Presentation
+  date: 2021-05-31
+  path: https://www.youtube.com/watch?v=kwLdCYYeltg
+  image: images/devopsconf.svg
+  categories:
+    - Kubernetes
+    - clusterloader2
+    - kubemark
+- title: "How to troubleshoot IPsec VPN misconfigurations"
+  descriptions: Article
+  date: 2022-12-14
+  path: https://www.redhat.com/sysadmin/troubleshoot-ipsec-vpn
+  image: images/tunnel-arrows-test.jpg
+  categories:
+    - IPsec
+    - RadHat
+    - Enable Sysadmin

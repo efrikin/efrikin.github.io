@@ -31,7 +31,9 @@ website:
     pinned: true
     title: "&nbsp;&nbsp;{{< meta authorname >}}<span class='icon-line'></span>My Reflections"
     left:
-      - text: personal blog
+      - text: publications&talks
+        href: publications-and-talks
+        icon: share
 
   search:
     location: navbar

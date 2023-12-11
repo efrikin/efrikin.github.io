@@ -1,0 +1,29 @@
+---
+# title: Publications&Talks
+listing:
+  contents:
+    - index.yaml
+  sort: "date desc"
+  type: default
+  fields:
+    - date
+    - title
+    - image
+    - categories
+    - descriptions
+  categories: false
+  sort-ui: false
+  filter-ui: false
+  id: additional-list
+page-layout: full
+title-block-banner: false
+execute:
+  echo: false
+---
+
+::: {#additional-list}
+:::
+
+[Slides](https://efrikin.github.io/devopsconf2021) for «Kubernetes cluster. Testing Performance and Scalability»
+
+<!-- # [PUBLICATIONS]{.second-color} -->
