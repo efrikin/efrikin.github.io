@@ -1,0 +1,21 @@
+---
+title: Post Title
+description: |
+  Post description
+date: Podt date
+author:
+  - name: "{{< meta authorname >}}"
+url: "https://"
+site-url: "https://"
+image: IMAGE.png
+image-alt: |
+  description
+categories:
+  - TAG_1
+  - TAG_2
+open-graph: true
+twitter-card: false
+draft: true
+---
+
+<!--------------- post content ----------------->
