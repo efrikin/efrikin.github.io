@@ -45,8 +45,8 @@ website:
 
   page-footer:
     center: |
-      <span class="faux-block">{{< fa brands creative-commons-share >}} {{< env QUARTO__CURRENT_YEAR >}} {{< meta authorname >}}</span><br>
-      <span class="faux-block"><a href='{{< env GITHUB_SERVER_URL >}}/{{< env GITHUB_REPOSITORY >}}'> {{< fa brands github >}} {{< env GITHUB_SHA >}}</a></span>
+      <span class="faux-block"><a href='{{< env GITHUB_SERVER_URL >}}/{{< env GITHUB_REPOSITORY >}}/tree/{{< env QUARTO__TAG >}}'> {{< fa brands github >}} {{< env QUARTO__TAG >}}</a></span><br>
+      <span class="faux-block">{{< fa brands creative-commons-share >}} {{< env QUARTO__CURRENT_YEAR >}} {{< meta authorname >}}</span>
     border: false
 format:
   html:
