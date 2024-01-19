@@ -17,3 +17,14 @@
     - IPsec
     - RadHat
     - Enable Sysadmin
+- title: "Pipeline as a Service: How To Test Pipelines in GitLab"
+  descriptions: Article
+  date: 2024-01-18
+  path: https://dzone.com/articles/how-to-test-pipelines-in-gitlab
+  image: images/pipelines.jpg
+  categories:
+    - DevOps
+    - CI/CD
+    - GitLab
+    - Tests
+    - DZone
