@@ -9,7 +9,7 @@ project:
 execute:
   freeze: auto
 
-title-meta: "EF"
+title-meta: "Evgenii Frikin"
 description-meta: "Personal blog"
 
 website:
