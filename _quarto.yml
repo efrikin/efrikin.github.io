@@ -4,10 +4,16 @@ draft: false
 
 project:
   type: website
+  preview:
+    host: 0.0.0.0
+    port: 6411
   # resources:
 
 execute:
   freeze: auto
+
+metadata-files:
+  - rfds/_quarto.local.yaml
 
 title-meta: "Evgenii Frikin"
 description-meta: "Personal blog"
@@ -36,7 +42,7 @@ website:
         icon: card-text
       - text: publications&talks
         href: publications-and-talks
-        icon: share
+        icon: share-fill
 
   search:
     location: navbar
