@@ -1,6 +1,6 @@
 website:
   navbar:
     left:
-      - text: RFDs
+      - text: RFD
         href: RFDs
         icon: file-text
