@@ -23,15 +23,15 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
 
+      - name: Prepare to build
+        run: |
+          echo "QUARTO__CURRENT_YEAR=$(date +%Y)" >> $GITHUB_ENV
+          echo "QUARTO__TAG=${GITHUB_REF#refs/*/*}" >> $GITHUB_ENV
+
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           lfs: true
-
-      - name: Prepare build
-        run: |
-          echo "QUARTO__CURRENT_YEAR=$(date +%Y)" >> $GITHUB_ENV
-          echo "QUARTO__TAG=${GITHUB_REF#refs/*/*}" >> $GITHUB_ENV
 
       - name: Create Release
         uses: elgohr/Github-Release-Action@v5
@@ -43,18 +43,10 @@ jobs:
       - name: Install Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
-      - name: Render
-        uses: quarto-dev/quarto-actions/render@v2
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v2
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+      - name: Render and Publish
+        uses: quarto-dev/quarto-actions/publish@v2
         with:
-          path: '_site'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v3
+          target: gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
