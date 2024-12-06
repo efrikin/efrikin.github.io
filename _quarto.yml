@@ -13,7 +13,7 @@ execute:
   freeze: auto
 
 metadata-files:
-  - rfds/_quarto.local.yaml
+  - RFDs/_quarto.local.yaml
 
 title-meta: "Evgenii Frikin"
 description-meta: "Personal blog"
