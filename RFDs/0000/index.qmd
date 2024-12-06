@@ -58,24 +58,22 @@ GitHub Issue or pull request seems to be required in order to understand and
 communicate upcoming changes to Kubernetes. In a blog post describing the road
 to Go 2, Russ Cox explains:
 
-[^2]: [KEP](https://github.com/kubernetes/enhancements/blob/master/keps/README.md)
-
-that it is difficult but essential to describe the significance of a problem in
+>>that it is difficult but essential to describe the significance of a problem in
 a way that someone working in a different environment can understand
 
-It is vital for the project to be able to track the chain of custody for a
+> It is vital for the project to be able to track the chain of custody for a
 proposed enhancement from conception through implementation.
-
-Without a standardized mechanism for describing important enhancements, our
+> Without a standardized mechanism for describing important enhancements, our
 talented technical writers and product managers struggle to weave a coherent
 narrative explaining why a particular release is important. Additionally,
 adopters of critical infrastructure such as Kubernetes need a forward-looking
 roadmap in order to plan their adoption strategies.
-
 The purpose of the KEP process is to reduce the amount of "tribal knowledge" in
 our community. By moving decisions from a smattering of mailing lists, video
 calls and hallway conversations into a well tracked artifact, this process aims
 to enhance communication and discoverability.
+
+[^2]: [KEP](https://github.com/kubernetes/enhancements/blob/master/keps/README.md)
 
 ### Openstack [^3]
 
