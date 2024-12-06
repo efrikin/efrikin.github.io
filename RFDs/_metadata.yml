@@ -1,0 +1,12 @@
+freeze: true
+title-block-banner: true
+
+open-graph: true
+twitter-card: false
+
+toc: true
+toc-depth: 3
+toc-title: Contents
+
+execute:
+  echo: false

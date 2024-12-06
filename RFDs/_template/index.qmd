@@ -1,0 +1,18 @@
+---
+title: |-
+  RFD: 0000
+status: draft
+author:
+  - name: John Doe
+  - name: Jane Doe
+date: YYYY-MM-DD
+date-format: long
+label:
+  - tpl
+link:
+  - "[link1](https://){target=_blank}"
+  - "[link2](https://){target=_blank}"
+open-graph: true
+# draft: true
+---
+

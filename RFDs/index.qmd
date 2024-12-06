@@ -1,0 +1,27 @@
+---
+listing:
+  # contents:
+  sort: "date desc"
+  type: table
+  fields:
+    - title
+    - status
+    - author
+    - label
+    - date
+    - file-modified
+    - link
+  categories: false
+  field-display-names:
+    link: Link
+    label: Label
+    status: Status
+  sort-ui: false
+  filter-ui: false
+page-layout: full
+title-block-banner: false
+execute:
+  echo: false
+---
+
+{{< include _link.qmd >}}
