@@ -15,29 +15,24 @@ git clone https://github.com/efrikin/efrikin.github.io.git
 git lfs pull
 ```
 
-### `Docker`
+### `Preview mode`
 
-#### `Preview mode`
+#### `Up`
 
 ```bash
-docker run
-    --rm -ti \
-    -u root \
-    -p6411:6411 \
-    -v $(pwd):/tmp \
-    registry.gitlab.com/quarto-forge/docker/quarto \
-        quarto preview --port 6411 --host 0.0.0.0
+podman kube play quarto-preview.yaml
 ```
 
-#### `Render`
+#### `Down`
 
 ```bash
-docker run
-    --rm -ti \
-    -u root \
-    -v $(pwd):/tmp \
-    registry.gitlab.com/quarto-forge/docker/quarto \
-        quarto render
+podman kube play quarto-preview.yaml --down
+```
+
+#### `Debugging`
+
+```bash
+podman pod logs quarto-preview
 ```
 
 ## `License`

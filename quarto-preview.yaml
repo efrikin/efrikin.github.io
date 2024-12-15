@@ -1,0 +1,39 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quarto-envs
+data:
+ QUARTO__CURRENT_YEAR: "2024"
+ QUARTO__TAG: 0.0.0
+ GITHUB_SERVER_URL: https://github.com
+ GITHUB_REPOSITORY: efrikin
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: quarto-preview
+spec:
+  containers:
+    - name: quarto
+      image: ghcr.io/quarto-dev/quarto:1.7.1
+      command:
+        - quarto
+        - preview
+      envFrom:
+        - configMapRef:
+            name: quarto-envs
+            optional: false
+      workingDir: /srv
+      ports:
+        - containerPort: 6411
+          hostPort: 6411
+      volumeMounts:
+        - name: source
+          mountPath: /srv:Z
+  volumes:
+    - name: source
+      hostPath:
+        path: ./
+        type: Directory
+
