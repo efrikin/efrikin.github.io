@@ -1,11 +1,12 @@
 # `Evgenii Frikin's blog`
 
-*I want to thank @EllaKaye because she presented website source code for people
-who looking for inspiration for and a starting point for their own sites*
+*I want to thank @EllaKaye because she presented the website source code for
+people who look for inspiration and a starting point for their own websites*
 
-My personal blog, <https://efrikin.github.io>.
+[My personal blog](https://blog.evgenii.us)
 
-Built with [Quarto](https://quarto.org), deployed to [GitHub Pages](https://pages.github.com).
+Built with [Quarto](https://quarto.org) and deployed to
+[GitHub Pages](https://pages.github.com).
 
 ## `Usage`
 
@@ -48,6 +49,6 @@ The code for the website is licensed under a
 ## `Please let me know!`
 
 I love to hear when other people have found my code useful. If that's you,
-please do [get in touch](https://efrikin.github.io) to let me know and
+please do [get in touch](https://blog.evgenii.us) to let me know and
 share your site with me. It's also a great way for me to get to know other
 people and their work, and I've come across great projects and ideas this way.

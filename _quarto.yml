@@ -22,7 +22,7 @@ website:
   title: "EF"
   description: "Personal blog"
   # favicon: images/favicon.png
-  site-url: "https://efrikin.github.io"
+  site-url: "https://blog.evgenii.us"
   repo-url: "{{< env GITHUB_SERVER_URL >}}/{{< env GITHUB_REPOSITORY >}}"
   repo-branch: main
   page-navigation: true

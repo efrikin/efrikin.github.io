@@ -24,6 +24,6 @@ execute:
 ::: {#additional-list}
 :::
 
-[Slides](https://efrikin.github.io/devopsconf2021) for «Kubernetes cluster. Testing Performance and Scalability»
+[Slides](https://blog.evgenii.us/devopsconf2021) for «Kubernetes cluster. Testing Performance and Scalability»
 
 <!-- # [PUBLICATIONS]{.second-color} -->
