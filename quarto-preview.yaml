@@ -14,9 +14,10 @@ kind: Pod
 metadata:
   name: quarto-preview
 spec:
+  terminationGracePeriodSeconds: 1
   containers:
-    - name: quarto
-      image: ghcr.io/quarto-dev/quarto:1.7.1
+    - name: preview
+      image: ghcr.io/quarto-dev/quarto:1.7.6
       command:
         - quarto
         - preview
