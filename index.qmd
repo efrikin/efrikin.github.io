@@ -16,8 +16,11 @@ about:
       text: GitHub
 ---
 
-# {{< fa hand >}} [Hi there!]{.primary}
-<h5>{{< fa user >}} My name is {{< meta authorname >}}.
+#
+
+<h5> [{{< fa hand >}} there!]{style="font-size: 140%;"}
+
+{{< fa user >}} My name is {{< meta authorname >}}.
 
 {{< fa laptop >}} I have been in IT for more than ten years.
 
@@ -31,5 +34,5 @@ about:
 
 {{< fa layer-group >}} I’m good at different infrastructure levels from IaaS to SaaS and also I'm a big fan of Everything as Code.
 
-{{< fa heart >}} I like OpenStack, Kubernetes, Fedora, GitLab, Ansible, Golang, Python and my hobby is long distance running {{< fa face-smile >}}</h3>
+{{< fa heart >}} I like OpenStack, Kubernetes, Fedora, GitLab, Ansible, Golang, Python and my hobby is long distance running {{< fa face-smile >}}</h5>
 

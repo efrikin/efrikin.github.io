@@ -12,7 +12,7 @@ data:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: quarto-preview
+  name: quarto
 spec:
   terminationGracePeriodSeconds: 1
   containers:
