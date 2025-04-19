@@ -1,0 +1,311 @@
+---
+title: |-
+  Fixing data types to MaxMind database with usage of Go
+description: |-
+  There are companies such as: MaxMind and IPinfo which collect
+  information about networks and build some databases and a lot of other
+  companies use these databases for geolocation detection.
+  Also there are compamies which build custom databases based on public
+  databases and if database doesn't correspond specification then applications
+  based on some libraries which meet the specification can't look up inside
+  in database.
+author:
+  - name: Evgenii Frikin
+date: 2025-04-19
+image: images/new-maxmind-logo.png
+image-alt: |
+ MaxMind Logo
+categories:
+  - MaxMind
+  - GeoIP2
+  - Go
+  - mmdbwriter
+open-graph: true
+draft: false
+---
+
+![](images/new-maxmind-logo.png)
+
+## Problem Statement
+
+A lot of companies use special databases for geolocation detection.
+It is used for the following situations:
+
+- routing request;
+- building white/black lists;
+- geolocation inserting during logs analysis;
+- etc.
+
+There are companies such as: `MaxMind`, `IPinfo`, etc. which collect information
+about networks and build these databases. There are databases which are
+distributed for free and also there are custom ones which are used inside
+companies. So, for example, `Graylog` has a function which allows to look up in
+databases such as: `GeoIP2 City`, `GeoIP2 Country`, etc. If custom MaxMind
+database (`mmdb`) doesn't correspond specification then Graylog or any
+application based on libraries which corresponds the specification can't look up
+inside in database.
+
+The article describes the real problem with custom mmdb and it solves.
+
+Testing environment:
+
+- Graylog 5.0.12
+- GeoIP2 City Test Database
+
+Graylog was updated to 6.1.x version and the `Lookup Table` stopped working.
+Each request to Graylog `Lookup Table` API returned the following response:
+
+```bash
+curl -u admin:test -H 'Accept: application/json' \
+http://localhost:9000/api/system/lookup/adapters/geoip2-country-test/query?key=2.125.160.216
+```
+
+```json
+{
+    "single_value": null,
+    "multi_value": null,
+    "string_list_value": null,
+    "has_error": false,
+    "ttl": 9223372036854776000
+}
+```
+
+and in the Graylog logs was found the following entries:
+
+```bash
+<skipped output>
+
+2025-04-12 19:28:19,544 WARN :
+org.graylog.plugins.map.geoip.MaxmindDataAdapter - Unable to look up
+city data for IP address /2.125.160.216, returning empty
+result.
+com.maxmind.db.DeserializationException: Error getting record for IP
+/2.125.160.216 -  Error creating object of type: Location -  argument type
+mismatch in latitude MMDB Type: java.lang.Float Java Type:
+java.lang.Double argument type mismatch in longitude MMDB Type:
+java.lang.Float Java Type: java.lang.Double
+
+<skipped output>
+
+Caused by: com.maxmind.db.DeserializationException: Error creating
+object of type: Location -  argument type mismatch in latitude
+MMDB Type: java.lang.Float Java Type: java.lang.Double argument
+type mismatch in longitude MMDB Type: java.lang.Float Java Type:
+java.lang.Double
+
+<skipped output>
+
+Caused by: java.lang.IllegalArgumentException: argument type mismatch
+
+<skipped output>
+```
+
+## Solution
+
+Although mmdb files haven't been updated conclusion can be made that root cause
+of the problem is in the Graylog and in order to find the solution it is
+necessary to refer to MaxMind DB documentation. According to
+GeoIP and GeoLite City and Country Databases[^mmdb_docs]
+the latitude and longitude fields have `Decimal` data type.
+So, the standard IEEE754[^ieee754] specifies on three floating-point decimal
+data types of different precision:
+
+[^mmdb_docs]: [GeoIP and GeoLite City and Country Databases](https://dev.maxmind.com/geoip/docs/databases/city-and-country/#blocks-files)
+[^ieee754]: [IEEE754](https://standards.ieee.org/ieee/754/993/)
+
+- Decimal32;
+- Decimal64;
+- Decimal128;
+
+In the Graylog GeoLocationInformation[^geo_java_class] class defines data types
+for latitude, longitude, countryIsoCode, countryName, cityName, etc. When
+client requests to Graylog API this class is used for response generation.
+
+[^geo_java_class]: [GeoLocationInformation](https://github.com/Graylog2/graylog2-server/blob/5.0.12/graylog2-server/src/main/java/org/graylog/plugins/map/geoip/GeoLocationInformation.java)
+
+So, starting Graylog 5.0.2[^grl502] from the class was changed and requires to
+use `Double` data type strictly
+([PR#15717](https://github.com/Graylog2/graylog2-server/pull/15717)).
+
+[^grl502]: [Graylog 5.2.0](https://github.com/Graylog2/graylog2-server/blob/5.2.0/graylog2-server/src/main/java/org/graylog/plugins/map/geoip/GeoLocationInformation.java)
+
+Now it is necessary to understand which data type for latitude/longitude is
+used in the custom mmdb. The mmdblookup[^mmdblooup] utility can help with it.
+The utility looks up an IP address in the specified mmdb file. The record
+for the IP address is displayed with `{}` to denote maps and `[]` to denote
+arrays. The values are followed by type annotations.
+
+[^mmdblookup]: [mmdblookup](https://maxmind.github.io/libmaxminddb/mmdblookup.html)
+
+
+```bash
+mmdblookup -v -f GeoIP2-City-Test.mmdb -i 2.125.160.216 location
+```
+
+```json
+  Database metadata
+    Node count:    1542
+    Record size:   28 bits
+    IP version:    IPv6
+    Binary format: 2.0
+    Build epoch:   1744482242 (2025-04-12 18:24:02 UTC)
+    Type:          GeoIP2-City
+    Languages:     en zh
+    Description:
+      en:   GeoIP2 City Test Database
+            (fake GeoIP2 data, for example purposes only)
+      zh:   小型数据库
+
+
+  Record prefix length: 125
+
+  {
+    "accuracy_radius":
+      100 <uint16>
+    "latitude":
+      51.750000 <float>
+    "longitude": <float>
+      -1.250000 <float>
+    "time_zone":
+      "Europe/London" <utf8_string>
+  }
+```
+
+According to output above data type of latitude/longitude is floating. That
+means custom mmdb was created without corresponding the specification.
+For example, this can happen when is used legacy tools or libraries.
+
+If data source for building mmdb isn't available then in order to change data
+type it is necessary to use some program which will read full mmdb file, change
+specific data type in fields and create new mmdb file. Unfortunately, there are
+no such ready-made tools for solving the problem that's why it is necessary to
+develop it. There are a lot of official/unofficial libraries to work with mmdb
+files e.g:
+
+- [mmdbwriter](https://github.com/maxmind/mmdbwriter)
+- [MaxMind-DB-Reader-python](https://github.com/maxmind/MaxMind-DB-Reader-python)
+- [GeoIP2-node](https://github.com/maxmind/GeoIP2-node)
+- [GeoIP2-ruby](https://github.com/maxmind/GeoIP2-ruby)
+- [MaxMind-DB-Common-perl](https://github.com/maxmind/MaxMind-DB-Common-perl)
+- [MaxMind-DB-Reader-java](https://github.com/maxmind/MaxMind-DB-Reader-java)
+- etc.
+
+In this case program was developed on Go with using of `mmdbwriter` library.
+In the library project there are several examples. One of them[^city-rewriter]
+is used as reference. There are several points which must known when to use
+`mmdbwrite` library:
+
+[^city-rewriter]: [MaxMind: mmdwriter example](https://github.com/maxmind/mmdbwriter/blob/v1.0.0/examples/city-rewriter/main.go)
+
+- If custom mmdb contains reserved networks `mmdbwriter.options`
+  should be defined with `IncludeReservedNetworks`;[^inc_net]
+- Each record to mmdb requires checking latitude/longitude because there can be
+  networks without them;
+- The library doesn't have any method for getting all networks from mmdb.
+  That's why we have to use third party mmdb reader[^mmdb_reader]
+- The library uses `inserter.ReplaceWith`[^inserter] by default.
+  The `inserter` function that replaces the existing value with the new value.
+  This can lead to removing any fields except latitude/longitude;
+
+
+[^inc_net]: [mmdbwriter: IncludeReservedNetworks](https://github.com/maxmind/mmdbwriter/blob/v1.0.0/tree.go#L44-L52);
+[^mmdb_reader]: [maxminddb-golang](https://github.com/oschwald/maxminddb-golang);
+[^inserter]: [inserter.ReplaceWith](https://github.com/maxmind/mmdbwriter/blob/v1.0.0/inserter/inserter.go#L24-L26)
+
+The full code version published to github project.[^github_project]
+
+[^github_project]: [mmdb-city-rewriter-location](https://github.com/efrikin/mmdb-city-rewriter-location)
+
+## Usage
+
+```bash
+go build
+./mmdb-city-rewriter-location -f GeoIP2-City-Test.mmdb
+```
+
+```bash
+2025/04/13 22:52:49 DB GeoIP2-City-Test.mmdb will be used
+2025/04/13 22:52:49 248 networks was process
+```
+
+New database is saved with `.fix` postfix:
+
+```bash
+mmdblookup -v -f GeoIP2-City-Test.mmdb.fix -i 2.125.160.216 location
+```
+
+```json
+
+  Database metadata
+    Node count:    1352
+    Record size:   28 bits
+    IP version:    IPv6
+    Binary format: 2.0
+    Build epoch:   1744573231 (2025-04-13 19:40:31 UTC)
+    Type:          GeoIP2-City
+    Languages:     en zh
+    Description:
+      en:   GeoIP2 City Test Database
+            (fake GeoIP2 data, for example purposes only)
+      zh:   小型数据库
+
+
+  Record prefix length: 125
+
+  {
+    "accuracy_radius":
+      100 <uint16>
+    "latitude":
+      51.750000 <double>
+    "longitude":
+      -1.250000 <double>
+    "time_zone":
+      "Europe/London" <utf8_string>
+  }
+```
+
+Now the latitude/longitude fields data type is `double`!
+Next it is necessary to upload new database to Graylog, add data adapter
+for Lookup Table and to make a request to API.
+
+```bash
+curl -u admin:test -H 'Accept: application/json' \
+http://localhost:9000/api/system/lookup/adapters/geoip2-country-test-fix/query?key=2.125.160.216
+```
+
+```json
+<skipped output>
+
+        "location": {
+            "accuracy_radius": 100,
+            "average_income": null,
+            "latitude": 51.75,
+            "longitude": -1.25,
+            "metro_code": null,
+            "population_density": null,
+            "time_zone": "Europe/London"
+        }
+
+<skipped output>
+```
+
+## Bread Crumbs
+
+In order to reproduce the described case It is necessary to build `bad` a
+database. There is MaxMind-DB[^mmdb-db] project which contains data sources
+meet the MaxMind specification. The project can be used as reference for
+creating mmdb file from text files. So, for example
+[GeoIP2-Country-Test.json](https://github.com/maxmind/MaxMind-DB/blob/main/source-data/GeoIP2-Country-Test.json)
+file provides data source for `GeoIP2 City`. The writer which is used for
+building mmdb meets the specification. That's why it is necessary to change the
+data type in the
+[geoip2.go](https://github.com/maxmind/MaxMind-DB/blob/main/pkg/writer/geoip2.go#L158)
+file from `Float64` to `Float32` and build mmdb from the data source.
+
+[^mmdb-db]: [MaxMind-DB](https://github.com/maxmind/MaxMind-DB)
+
+## References
+
+- [Enriching MMDB files with your own data using Go](https://blog.maxmind.com/2020/09/enriching-mmdb-files-with-your-own-data-using-go/)
+- [GeoIP challenges - Custom-City.mmdb](https://discuss.elastic.co/t/geoip-challenges-custom-city-mmdb/355173/16)
+
