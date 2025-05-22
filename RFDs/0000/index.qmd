@@ -1,6 +1,8 @@
 ---
 title: |-
   RFD: 0000
+subtitle: |
+  Request for Discussion
 status: published
 author:
   - name: Evgenii Frikin
@@ -13,6 +15,14 @@ link:
 open-graph: true
 # draft: true
 ---
+
+<style>
+figcaption {
+    text-align: center;
+}
+</style>
+
+![Photo by lhphotos (St Adobe Stock)](images/rfd.png){fig-align="center"}
 
 This document describes a format for changing in technical/non-technical
 documents in projects.

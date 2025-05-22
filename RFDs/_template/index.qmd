@@ -1,6 +1,8 @@
 ---
 title: |-
   RFD: 0000
+subtitle: |
+   subtitle
 status: draft
 author:
   - name: John Doe

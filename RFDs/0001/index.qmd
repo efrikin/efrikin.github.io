@@ -1,0 +1,502 @@
+---
+title: |-
+  RFD: 0001
+subtitle: |
+  SSH Break-Glass
+status: implemented
+author:
+  - Evgenii Frikin
+  - Denis Makrushin
+date: 2024-12-06
+date-format: long
+label:
+  - ssh
+  - break-glass
+link:
+  - "[#2](https://github.com/efrikin/rfds/pull/2){target=_blank}"
+  - "[#3](https://github.com/efrikin/rfds/pull/3){target=_blank}"
+  - "[#4](https://github.com/efrikin/rfds/pull/4){target=_blank}"
+  - "[#5](https://github.com/efrikin/rfds/pull/5){target=_blank}"
+open-graph: true
+# draft: true
+---
+
+<style>
+figcaption {
+    text-align: center;
+}
+</style>
+
+![Project Logo](images/logo.svg){fig-align="center"}
+
+This document desribes a &laquo;`break-glass`&raquo; mechanism
+based on SSH certificate-based authentication with authorization implemented
+via NSS and PAM modules
+
+## Problem Statement
+
+Disaster recovery is a critical part of any infrastructure. On-call or support
+engineers must have secure access to critical systems in case any disruption.
+Recovery mechanism must be secure and protected because it implies access to
+critical systems and data bypassing traditional authentication and authorization
+process. This mechanism is usually called &laquo;`break-glass`&raquo;.
+It includes special credentials usage in an emergency case when traditional
+access methods do not work.
+
+> Break-glass access refers to a procedure used in critical emergencies or
+exceptional cases, when a user with insufficient access is granted elevated
+access rights to bypass normal access controls - SSH Academy [^break-glass]
+
+[^break-glass]: [What is Break-Glass Access?](https://www.ssh.com/academy/secrets-management/what-is-break-glass-access)
+
+In common case companies use SSH protocol and dedicate highest-level account to
+access to infrastructure in emergency case. This approach brings the following
+issues:
+
+- all systems must have pre-created share accounts. Those accounts create issues
+  in case of a potential investigation
+- after using the &laquo;`break-glass`&raquo; process password should be changed
+  in order to prevent no unauthorized access
+- An on-call engineer must have access to password manager where credentials are
+  stored for emergency accounts. In fact without a password manager a company is
+  cut off from its systems. A comprehensive &laquo;`break-glass`&raquo; solution
+  is required to give the engineers access back to their critical
+  systems when password manager fails.
+
+The most common way of handling SSH authentication is public key authentication.
+This is much stronger than simply using a password, but it creates a problem of
+how to securely manage changes to SSH keys over time. So, if ten new people join
+a company and `five` others leave, someone has to add the `ten` new keys to each
+server and remove the previous five. Although, pubkeys partly solve issue related
+to authentication, but do not solve the limitations described above. Also
+pubkey(s) adds new challenges and some researches show the it:
+
+
+>Monitoring of the usage of the keys has revealed that typically about 90% of
+the authorized keys are unused. That is, they are access credentials that were
+provisioned years ago, the need for which ceased to exist or the person having
+the private key left, and the authorized key was never deprovisioned. Thus,
+the access was not terminated when the need for it ceased to exist.\
+\...\
+In many organizations – even very security-conscious organizations – there are
+many times more obsolete authorized keys than they have employees. Worse,
+authorized keys generally grant command-line shell access, which in itself is
+often considered privileged. We have found that in many organizations about 10%
+of the authorized keys grant root or administrator access. SSH keys never
+expire. [^ylonen]
+
+[^ylonen]: [Challenges in Managing SSH Keys – and a Call for Solutions](https://ylonen.org/papers/ssh-key-challenges.pdf)
+
+
+>Historically, most organizations have not touched the location of the authorized
+keys files. This means they are in each user's home directory, and each user can
+configure additional permanent credentials for themselves and their friends.
+They can also add additional permanent credentials for any service account or
+root account they are able to log into. This has lead to massive problems in
+large organizations around managing SSH keys.\
+\
+AuthorizedKeysFile /etc/ssh/authorized-keys/%u\
+\
+Enterprises should also pay attention to the AuthorizedKeysCommand and
+AuthorizedKeysCommandUser options. They are typically used when SELinux is
+enabled and to fetch SSH keys from LDAP directories or other data sources.
+Their use can make auditing SSH keys cumbersome and they can be used to hide
+backdoor keys from casual observation. [^ssh-academy]
+
+[^ssh-academy]: [AuthorizedKeysFile location](https://ssh.com/academy/ssh/sshd_config)
+
+Although, pubkeys have advantages over password keys are not passwords.
+There are several significant differences between SSH keys and
+passwords: [^ssh-academy-2]
+
+[^ssh-academy-2]: [SSH Key Management Compass - 9 Ways To Manage Your Authentication Keys](https://www.ssh.com/hubfs/White%20papers/SSH-key-management-compass-2022.pdf)
+
+- Passwords are related to user accounts. SSH user keys don not have to be
+- Passwords usually have expiration times SSH user keys don not
+- Passwords cannot be generated without oversight SSH user keys can
+- Passwords are mostly used for interactive authentication. SSH keys are can
+  used for machine-to-machine authentication
+- Passwords grant access to the operating system level without additional
+  restrictions SSH user keys can control both access and privilege levels
+
+That's why the way where advantages passwords and pubkeys is needed. SSH
+supports such way of handling authenticatio via `Certificate Authorities` (CAs).
+Certificates enable to associate credentials with user, use audit, create
+short-lived identity and use metadata as an extending point for
+authentication/authorization, etc.
+
+::: {.callout-note}
+Traditional pubkey(s) have metadata, but it can be changed any users.
+:::
+
+Finally, implementations of ephemeral certificates provide the ability to
+utilize approaches, such as: `Keyless`, `Zero Trust`, `Just-In-Time` for access
+to remote systems using short-lived identity instead of static keys and
+passwords.
+
+## Specification
+
+Obviously, certificates have more advantages, but certificates and SSH protocol
+itself have some limitations. SSH protocol and certificates do not solve and do
+not have to solve user management and authorization issues (e.g. assigning sudo
+rules). That's why account must be pre-created together with sudoers files.
+
+In order to understand which solution can help with limitations related to user
+management and assigning permissions it's necessary to consider SSH protocol.
+It is designed as three protocols that typically run-on top of TCP:
+
+- `SSH Transport Layer Protocol` is responsible for server authentication,
+  confidentiality, integrity and compression
+- `SSH User Authentication Protocol` is responsible for client (user)
+  authentication to the server
+- `SSH Connection Protocol` is responsible for multiplexing the encrypted tunnel
+  into several logical channel
+
+```{mermaid}
+%%| label: fig-ssh-stack
+%%| fig-align: center
+%%| fig-cap: "SSH stack protocol"
+%%| file: diagrams/01-ssh-stack-protocols.mmd
+```
+
+The last step in the `SSH Transport Layer Protocol` is service request. A client
+sends an `SSH_MSG_SERVICE_REQUEST` to request the
+`SSH User Authentication Protocol` or `SSH Connection Protocol`. All the data
+will be sent protected by encryption and MAC.
+
+According to `Authentication Requests` section in the RFC4252: [^rfc4252]
+
+>If the requested 'user name' does not exist, the server MAY disconnect, or MAY
+send a bogus list of acceptable authentication 'method name' values, but never
+accept any. This makes it possible for the server to avoid disclosing information
+on which accounts exist. In any case, if the 'user name' does not exist, the
+authentication request MUST NOT be accepted.
+
+[^rfc4252]: [RFC4252: Authentication Requests](https://datatracker.ietf.org/doc/html/rfc4252#section-5)
+
+```{mermaid}
+%%| label: fig-sshd-nss
+%%| fig-align: center
+%%| fig-cap: "Conversation between sshd and NSS"
+%%| file: diagrams/08-sshd-nss.mmd
+```
+
+That's why it's necessary to consider `SSH User Authentication Protocol` in a
+more detailed way. It performs the following functions:
+
+- Message Types and Formats
+- Message Exchange
+- Authentication Methods
+
+`SSH User Authentication Protocol` phases:
+
+1. client sends `SSH_MSG_USERAUTH_REQUEST` message
+2. if username is not valid then server sends either `SSH_MSG_USERAUTH_FAILURE`
+   or authentication method list
+3. client selects one of the methods from the list and again sends the request
+   to the server
+4. if the server requires more than one authentication method then server
+   sends partial success
+5. when all required authentication methods succeed the server sends a
+   `SSH_MSG_USERAUTH_SUCCESS` message.
+
+```{mermaid}
+%%| label: fig-ssh-auth
+%%| fig-align: center
+%%| fig-cap: "SSH User Authentication protocol"
+%%| file: diagrams/02-ssh-auth.mmd
+```
+
+The server may require one or more of the following authentication methods:
+
+- Public key
+- Password
+- Host-based
+
+```{mermaid}
+%%| label: fig-ssh-auth-cert-1
+%%| fig-align: center
+%%| fig-cap: "SSH Authentication by Certificate "
+%%| file: diagrams/03-ssh-auth-cert-1.mmd
+```
+
+`Certificate-based` authentication is an extension of public key authentication
+where there is CA role for enhancement security. It uses three main components:
+a private key, a public key, and a certificate signed by the CA.
+
+`Certificate-based` authentication phases are:
+
+1. client sends `SSH_MSG_USERAUTH_REQUEST` message
+2. username is not valid then server sends either `SSH_MSG_USERAUTH_FAILURE`
+   or authentication method list
+3. client sends SSH certificate signed by a trusted CA to the server
+4. server makes the following verifications:
+	- signature on a client certificate based on the public key CA
+	- validity period certificate
+	- requested user account (principals)
+5. if the certificate is valid then server grants access to the client based on
+   the identity
+6. when all required authentication methods succeed the server sends a
+   `SSH_MSG_USERAUTH_SUCCESS` message
+
+```{mermaid}
+%%| label: fig-ssh-auth-cert-2
+%%| fig-align: center
+%%| fig-cap: "SSH Authentication by Certificate"
+%%| file: diagrams/04-ssh-auth-cert-2.mmd
+```
+
+According to `Problem Statement` section it's necessary to pay attention on
+second and last phases in the certificate-based authentication. So, if
+username does not exist then ssh server will not continue authentication
+process. That's why on this phase it's necessary to create user, home directory,
+etc. SSH server must call `Name Service Switch` (NSS) which looks up user in
+different data sources (depends on settings in the `/etc/nsswitch.conf`).
+If NSS returns success then user exists. Thus, SSH server continues
+authentication process depending on authentication methods (password, pubkey,
+etc.). All authentication methods depend on NSS answer. SSH server checks
+settings related to authentication methods (e.g. looks up password in the
+`/etc/shadow` or keys in `AuthorizedKeysFile` [^sshd-config-auth-keys]).
+In order to create user on-demand it's necessary to implement custom NSS module
+and configure it in the `/etc/nsswitch.conf`.
+
+[^sshd-config-auth-keys]: man 5 sshd_config
+
+After successful authentication (last authentication phase) the next stage is
+`Session Establishment`. On that stage the client is allowed to access to the
+server. Session is opened after all `Linux Pluggable Authentication` (PAM)
+verification. In order to configure user's session it's necessary to implement
+custom PAM module and configure it in one of files in the `/etc/pam.d`.
+During performing PAM stage some environment variables will be defined. One of
+them is `SSH_AUTH_INFO_0`.[^ssh-auth-info] It exposes authentication information to PAM module
+(e.g. pubkey, certificate, etc.). This variable can be used as source for
+making decisions during authorization process (e.g. assigning sudo group to
+user).
+
+[^ssh-auth-info]: [openssh-portable/auth-pam.c](https://github.com/openssh/openssh-portable/blob/953fa5b59afb04c3c74ed82d7bace65c13cd8baa/auth-pam.c#L778-L796)
+
+::: {.callout-important}
+UsePAM Enables the Pluggable Authentication Module interface. If set to yes this
+will enable PAM authentication using `KbdInteractiveAuthentication and
+PasswordAuthentication in addition to PAM account and session module processing
+for all authentication types.`
+
+Because PAM `keyboard-interactive authentication usually serves an equivalent
+role to password authentication`, you should disable either
+`PasswordAuthentication` or
+`KbdInteractiveAuthentication`. [^sshd-config-usepam]
+:::
+
+[^sshd-config-usepam]: man 5 sshd_config
+
+
+```{mermaid}
+%%| label: fig-sshd-nss-pam
+%%| fig-align: center
+%%| fig-cap: "Conversation between sshd, NSS and PAM"
+%%| file: diagrams/07-sshd-nss-pam.mmd
+```
+
+::: {.callout-tip title="Alternative way"}
+One of the ways to get authentication information during ssh connection it's
+possible to use `-A` flag. This flag enables forwarding of connections from an
+authentication agent (ssh-agent) via a socket to a remote host. Path to socket
+is stored in the `SSH_AUTH_SOCK` environment variable. It possible to get an
+access to the variable on a remote host, but this way has some security issues
+related to forwarding the socket to all hosts. It's possible to solve it if user
+set explicitly a forward socket for each other hosts (e.g. `ForwardAgent yes`).
+:::
+
+When session is closed PAM module must perform the following actions:
+
+- removing record to the /etc/passwd
+- removing home directory
+- killing all process related to the user
+- etc.
+
+Thus, all users is temporary
+
+```{mermaid}
+%%| label: fig-ssh-nss-pam
+%%| fig-align: center
+%%| fig-cap: Using NSS and PAM by SSH server
+%%| file: diagrams/05-ssh-nss-pam.mmd
+```
+
+### HLD [^HLD]
+
+![High Level Design](images/bg-hld.svg){fig-align="center" #bg-hld}
+
+[^HLD]: [Fortanix Data Security Manager](https://www.fortanix.com/resources/solution-briefs/fortanix-dsm-ssh-ca)
+
+### Naming convention
+
+#### `Key ID` field
+
+`Key ID` field usually contains policy name which describes access level on
+hosts. It makes audit logs more detailed.
+
+Currently, PAM module supports the following format of the field:
+
+[resource version]:environment:[sudo group]
+
+`resource version:` reserved for future usage. `Default: ssh_v1`
+
+`environment:` reserved for future usage. If the field is not defined It will be
+set as `!`. The `!` means that the field does not have value by default.
+
+`sudo group:` [admins|users]. `Default: users`
+
+::: {.callout-note}
+Not all of the fields are required to be filled but `Key ID` minimum format
+must be defined as `::`. The `::` expands as `ssh_v1:!:users` by default.
+:::
+
+### Minimum requirements
+
+[OpenSSH >= `7.6p1`](https://www.openssh.com/txt/release-7.6){target=_blank}
+(has been tested on `Fedora 41 and OpenSSH 9.8p1`)
+
+```conf
+Port 1110 # <1>
+UsePAM yes
+Match LocalPort 1110
+       TrustedUserCAKeys /path/to/ca
+       AuthenticationMethods publickey
+       PAMServiceName brkgl2s
+Match All
+```
+
+1. _Add to /etc/ssh/sshd_config.d/00-break-glass.conf_
+
+### Known limitations
+
+Custom NSS module:
+
+- each time generates a random `UID/GID` during the account creation process.
+  `UID/GID` will be different to two hosts for same username.
+- requires username to contain postfix (`.brkgl2s`) as an additional restriction
+  for checking service name which calls NSS
+- supports only `two` sudo groups (for more details please check
+  [Naming convention](#naming-convention) section)
+- each user is assigned unique `UID/GID` but the group itself related to `GID`
+  is not created
+- changing service name is not supported
+  (option `PAMServiceName`[^sshd-config-pam-service-name]).
+
+[^sshd-config-pam-service-name]: man 5 sshd_config
+
+Custom PAM module:
+
+- removes record about the user and home directory after the session is closed
+- termination all the process related to the user is not implemented
+- only `ed25519` pubkey type is supported
+- user is created each time when username matches with compliance. If
+  SSH-server sends `SSH_MSG_USERAUTH_FAILURE` (e.g. invalid certificate) for
+  some reason then user record is not deleted
+
+### Pitfals
+
+#### Checking PAM service name
+
+System calls related to NSS which is used in tools, such as: `id`, `getent`,
+`etc.` will create a record in the users data source each time when user does
+not exist. In order to avoid the problem it’s necessary to limit PAM services
+which can use the custom NSS module and if calling PAM service is not ssh then
+NSS module must return `NSS_STATUS_TRYAGAIN`. The `nss-devel` does not have any
+functions for checking PAM service which calls NSS, but NSS modules can get
+some environment variables by analogy with PAM modules. So,
+`SYSTEMD_EXEC_PID`[^systemd-exec-pid] environment variable stores `PID` process
+which calls NSS service. When `PID` is known it enables to get process name via
+`/proc/PID/comm`[^proc-pid-comm]. Thus, implementation of checking of process
+name partly solves the problem and enables to use the tools without adding
+users to a data source. Unlike the `nss-devel` in the `pam-devel` library is an
+implemented function for getting a PAM service name.
+
+[^systemd-exec-pid]: man 5 systemd.exec
+
+[^proc-pid-comm]: man 5 proc_pid_comm
+
+```{mermaid}
+%%| label: fig-ssh-nss-pam-custom
+%%| fig-align: center
+%%| fig-cap: Using custom NSS and PAM by SSH server
+%%| file: diagrams/06-ssh-nss-pam-custom.mmd
+```
+
+#### Checking username
+
+In fact, the limitation related to postfix in a username is artificial and the
+postfix can be removed but it can brings to face the following problem:
+
+there is danger that during creating of users at runtime an attacker can attempt
+to flood waste records to `/etc/passwd`. In fact, the postfix in username does
+not solve the problem if the attacker knowns about it. Also regular
+authentication process should be different from emergency authentication process.
+If the processes are united then users who already connected to hosts before the
+emergency situation will have an opportunity to pass authentication without
+necessity of creating the new user.
+
+Nowadays the processes were splitted in order to improve management regular and
+emergency users but It does not guarantees that in the future the limitation may
+be removed.
+
+::: {.callout-note title="@efrikin"}
+My thoughts led me to an idea that ssh port should be opened only
+during emergency situations on network equipments. In regular time `ACLs` on
+network equipments should restrict an access to ssh port on hosts. Currently,
+In my opinion the processes must be splitted in order to manage and develop
+easily.
+:::
+
+### Similar projects
+
+- [pam-ussh](https://github.com/uber/pam-ussh)
+- [google-hiba](https://github.com/google/hiba)
+
+## Details of implementation
+
+### `get_pubkey_info` function
+
+There is a reason why `get_pubkey_info` function was implemented via `execvp`
+and `pipe`. The thing is that libraries such as `libssh` and `libssh2` don't
+have the functions which look up the fields inside of pubkey (certificate) and
+also `OpenSSHp1` doesn't have public API for implementing this function.
+The function can be implemented via using low level primitives.
+In the future there are a lot of reasons to refactor the function.
+
+In fact the function was implemented as parent and two child processes with
+redirect `stdin/stdout` via pipe. So, first child process writes the variable
+value which contains pubkey to `stdout`. Second child process reads from
+`stdin` via pipe and sends to `stdout` via pipe to the parent process.
+The parent process reads from `stdin` and sends to `ssh -L -f-` command.
+It looks like this `cat pubkey | ssh -L -f-` command in shell interpreter.
+Next, the parent process looks up some fields and saves into a structure.
+
+### `adduser` function
+
+During user account creation instead of real password is used `!` char.
+According to `man 5 shadow`:[^man_shadow]
+
+> If the password field contains some string that is not a valid result of
+`crypt(3)`, for instance ! or *, the user will not be able to use a unix
+password to log in (but the user may log in the system by other means).
+
+[^man_shadow]: man 5 shadow
+
+the `!` (or `*`) char means the account doesn't have a password and no password
+will allow to access the account. The `x` char means the password is located in
+the `/etc/shadow` file and that's why the custom NSS module must never create
+entries in the `/etc/shadow` and use `x` char instead of password in the
+`/etc/passwd` file.
+
+## References
+
+- [wh0: The SSH Protocol](https://wh0.github.io/2018/02/27/ssh-protocol.html){target=_blank}
+- [Teleport: SSH Certificates Security](https://goteleport.com/blog/ssh-certificates/){target=_blank}
+- [Using certificates for SSH authentication](https://lwn.net/Articles/913971/){target=_blank}
+- [Netburner: Introduction to the SSH Protocol](https://www.netburner.com/learn/introduction-to-the-ssh-protocol/){target=_blank}
+- [SecureW2: How Does SSH Certificate Authentication Work?](https://www.securew2.com/blog/how-does-ssh-certificate-authentication-work){target=_blank}
+- [NISTIR 7966: Security of Interactive and Automated Access Management Using SSH](https://nvlpubs.nist.gov/nistpubs/ir/2015/nist.ir.7966.pdf){target=_blank}
+- [Cloudflare: Fearless SSH: short-lived certificates bring Zero Trust to infrastructure](https://blog.cloudflare.com/intro-access-for-infrastructure-ssh/){target=_blank}
+

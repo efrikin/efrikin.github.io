@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant c as SSH client
+    participant CA as Certificate Authority
+    participant s as SSH server
+    c ->> CA: send SSH certificate
+    activate CA
+        Note right of CA: Generate short-lived certificate
+        CA ->> c: Certificate has been generated
+    deactivate CA
+    c ->> s: SSH authentication via certificate
+    activate s
+        Note right of s: Validate certificate by CA
+        s ->> c: SSH authentication has been successful
+    deactivate s
+

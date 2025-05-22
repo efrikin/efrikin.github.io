@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant c as SSH client
+    participant s as SSH server
+    Note over c, s: TCP connection has been established
+    Note over c, s: SSH key exchange has been done
+    Note over c, s: SSH_MSG_SERVICE_REQUEST has been sent
+    c->>s: SSH_MSG_USERAUTH_REQUEST
+    activate s
+    alt is the user invalid
+        s ->> c: SSH_MSG_USERAUTH_FAILURE
+        opt
+            s ->> c: Authentication method list
+        end
+    else the user is valid
+        s ->> c: Authentication method list
+    end
+    deactivate s
+    c->>s: SSH_MSG_USERAUTH_REQUEST <br> + <br>Authentication method has been selected
+    activate s
+    alt is additional an authentication method(s) required
+        s ->> c: Partial success
+        Note over c, s: Step(s) related to additional authentication method(s)
+    else
+        s ->>c: SSH_MSG_USERAUTH_SUCCESS
+    end
+    deactivate s
+

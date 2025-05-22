@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant c as SSH client
+    participant s as SSH server
+    Note over c, s: TCP connection has been established
+    Note over c, s: SSH key exchange has been done
+    Note over c, s: SSH_MSG_SERVICE_REQUEST has been sent
+    Note over c, s: Authentication method has been selected
+    c ->> s: send SSH certificate signed by CA
+    activate s
+    critical validate SSH certificate
+        s-->s: Certificate Authority
+        s-->s: Expiration date
+        s-->s: Principals
+        s-->s: etc.
+            alt is not valid
+                s->>c: SSH_MSG_USERAUTH_FAILURE
+            else is valid
+        s->>c: SSH_MSG_USERAUTH_SUCCESS
+    end
+    end
+    deactivate s
+
