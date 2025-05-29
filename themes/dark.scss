@@ -477,7 +477,13 @@ kbd {
   background-color: $body-bg;
 }
 
-
+#quarto-appendix.default {
+  .quarto-appendix-bibtex {
+    code.sourceCode {
+      color: white;
+    }
+  }
+}
 
 /*
 pre.sourceCode {

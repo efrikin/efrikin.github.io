@@ -44,10 +44,7 @@ website:
         href: publications-and-talks
         icon: share-fill
 
-  search:
-    location: navbar
-    type: textbox
-    copy-button: true
+  search: false
 
   page-footer:
     center: |
@@ -62,7 +59,7 @@ format:
     css:
       - themes/custom.css
     code-block-border-left: true
-    # highlight-style:
+    highlight-style: themes/custom.theme
       # light:
       # dark:
     smooth-scroll: true
