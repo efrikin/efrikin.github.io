@@ -1,5 +1,6 @@
 freeze: true
 title-block-banner: true
+page-layout: full
 
 open-graph: true
 twitter-card: false
