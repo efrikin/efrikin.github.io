@@ -15,11 +15,11 @@ execute:
 metadata-files:
   - RFDs/_quarto.local.yaml
 
-title-meta: "Evgenii Frikin"
-description-meta: "Personal blog"
+title-meta: "{{< meta authorname >}}"
+description-meta: "{{< meta authorname >}} Personal blog My Reflection"
 
 website:
-  title: "Egenii Frikin's Blog"
+  title: "Evgenii Frikin's Blog"
   description: "Personal blog"
   # favicon: images/favicon.png
   site-url: "https://blog.evgenii.us"
@@ -69,6 +69,7 @@ format:
     fig-cap-location: margin
     reference-location: margin
     footnotes-hover: true
+    from: markdown+emoji
     include-in-header: _includes/seo.html
 
 editor: source

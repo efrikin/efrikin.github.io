@@ -6,33 +6,35 @@ execute:
   echo: false
 
 about:
-  template: jolla
+  template: marquee
   links:
     - icon: linkedin
-      href: "https://linkedin.com/in/efrikin"
+      href: https://linkedin.com/in/efrikin
       text: LinkedIn
     - icon: github
-      href: "https://github.com/efrikin"
+      href: https://github.com/efrikin
       text: GitHub
 ---
 
-#
 
-<h5> [{{< fa hand >}} there!]{style="font-size: 140%;"}
+# :wave: there!
 
-{{< fa user >}} My name is {{< meta authorname >}}.
+::: {style="font-size: 115%;"}
 
-{{< fa laptop >}} I have been in IT for more than ten years.
+:adult: My name is {{< meta authorname >}}
 
-{{< fa person-digging >}} My career started as a System Administrator.
+:computer: I have been in IT for more than ten years
 
-{{< fa phone >}} After that I worked as a Site Reliability Engineer about three years
+:rocket: My career started as a System Administrator
 
-{{< fa magnifying-glass >}} Then I worked in Research and Development team for about four years
+:telephone_receiver: After that I worked as a Site Reliability Engineer about three years
 
-{{< fa cloud >}} I was researching hot topics related to performance large-scale clusters in cloud technologies area.
+:mag_right: Then I worked in Research and Development team for about four years
 
-{{< fa layer-group >}} I’m good at different infrastructure levels from IaaS to SaaS and also I'm a big fan of Everything as Code.
+:cloud: I was researching hot topics related to performance large-scale clusters in cloud technologies area
 
-{{< fa heart >}} I like OpenStack, Kubernetes, Fedora, GitLab, Ansible, Golang, Python and my hobby is long distance running {{< fa face-smile >}}</h5>
+:ladder: I am good at different infrastructure levels from IaaS to SaaS and also I'm a big fan of Everything as Code
 
+:hearts: I like OpenStack, Kubernetes, Fedora, GitLab, Ansible, Golang, Python and my hobby is long distance running :rabbit2:
+
+:::
