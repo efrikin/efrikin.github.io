@@ -32,6 +32,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: true
+      
+      - name: Install d2lang
+        run: curl -fsSL https://d2lang.com/install.sh | sh -s --
 
       - name: Install Quarto
         uses: quarto-dev/quarto-actions/setup@v2

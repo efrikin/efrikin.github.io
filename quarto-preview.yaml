@@ -17,7 +17,7 @@ spec:
   terminationGracePeriodSeconds: 1
   containers:
     - name: preview
-      image: ghcr.io/quarto-dev/quarto:1.8.7
+      image: ghcr.io/quarto-dev/quarto:1.8.24
       command:
         - quarto
         - preview
@@ -31,10 +31,29 @@ spec:
           hostPort: 6411
       volumeMounts:
         - name: source
-          mountPath: /srv:Z
+          mountPath: /srv:z
+        - name: certs
+          ## Note: hostPath volume types created by kube play is given an
+          ## SELinux shared label (z), bind mounts are not relabeled
+          ## (use chcon -t container_file_t -R <directory>).
+          ## https://docs.podman.io/en/v5.5.1/markdown/podman-kube-play.1.html
+          ## sudo chcon -t container_file_t /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+          mountPath: /etc/ssl/certs/ca-certificates.crt
+        - name: d2
+          mountPath: /bin/d2:Z
   volumes:
     - name: source
       hostPath:
         path: ./
         type: Directory
+    - name: d2
+      hostPath:
+        path: asserts/d2
+        type: File
+    - name: certs
+      hostPath:
+        path: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+        type: File
+
+
 
