@@ -1,0 +1,68 @@
+vars: {
+  d2-config: {
+    theme-id: 200
+    layout-engine: elk
+  }
+}
+
+style: {
+  fill: transparent
+}
+
+ssh: "" {
+  style: {
+    fill: transparent
+  }
+  grid-rows: 3
+  /* icon: https://icons.terrastruct.com/dev%2Fssh.svg */
+  icon.near: top-right
+  ssh_stack: "" {
+    style: {
+      fill: beige
+      stroke: maroon
+      stroke-width: 3
+    }
+    ssh_auth: SSH User Authentication Protocol {
+      style: {
+        fill: gold
+        stroke: maroon
+        font-color: black
+        font-size: 26
+        stroke-width: 3
+        stroke-dash: 3
+      }
+    }
+    ssh_conn: SSH Connection Protocol {
+      style: {
+        fill: gold
+        stroke: maroon
+        font-color: black
+        font-size: 26
+        stroke-width: 3
+        stroke-dash: 3
+      }
+    }
+  }
+
+  ssh_transport: SSH Transport Layer Protocol {
+    style: {
+      fill: beige
+      stroke: maroon
+      font-color: black
+      font-size: 26
+      stroke-width: 3
+    }
+  }
+
+  tcp_ip: TCP/IP {
+    width: 400
+    style: {
+      fill: beige
+      stroke: green
+      font-color: black
+      font-size: 26
+      stroke-width: 3
+      multiple: true
+    }
+  }
+}

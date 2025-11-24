@@ -1,0 +1,160 @@
+vars: {
+  d2-config: {
+    theme-id: 200
+    layout-engine: elk
+  }
+}
+
+style: {
+  fill: transparent
+}
+
+classes: {
+  default: {
+    style: {
+      animated: true
+      font-size: 22
+    }
+  }
+  account: {
+    style: {
+      animated: true
+      stroke: fuchsia
+    }
+  }
+  session: {
+    style: {
+      animated: true
+      stroke: yellow
+    }
+  }
+  password: {
+    style: {
+      animated: true
+      stroke: lime
+    }
+  }
+  auth: {
+    style: {
+      animated: true
+      stroke: aqua
+    }
+  }
+  response: {
+    style: {
+      animated: true
+      stroke: white
+      font-size: 22
+    }
+  }
+}
+
+direction: right
+
+sshd: "sshd process" {
+  style: {
+    fill: transparent
+    font-size: 50
+  }
+
+  ssh_server: SSH Server {
+    style: {
+      font-size: 32
+      fill: transparent
+    }
+  }
+  PAM: {
+    style: {
+      font-size: 32
+      fill: transparent
+    }
+    library: {
+      style: {
+        multiple: true
+        font-size: 32
+      }
+    }
+  }
+  NSS: {
+    style: {
+      fill: transparent
+      font-size: 32
+    }
+  }
+  NSS.library: {
+    style: {
+      font-size: 32
+      multiple: true
+    }
+  }
+  NSS.library <-> ssh_server: 1. Requests\nResponse {
+    class: default
+    style: {
+      stroke: orange
+      font-size: 32
+    }
+  }
+  pamd -> PAM
+  ssh_server -> PAM: 2. If user exist and UsePAM enabled {
+    class: default
+    style: {
+      stroke: orange
+      font-size: 32
+    }
+  }
+  ssh_server <- PAM: 3. Response {
+    class: response
+    style: {
+      stroke: orange
+      font-size: 32
+    }
+  }
+  pamd: "/etc/pam.d/*" {
+    style: {
+      multiple: true
+      font-size: 32
+    }
+  }
+}
+
+pam_modules: "PAM\nModules" {
+  style: {
+    font-size: 32
+    fill: transparent
+  }
+  account: {
+    style: {
+      font-size: 26
+      multiple: true
+    }
+  }
+  session: {
+    style: {
+      font-size: 26
+      multiple: true
+    }
+  }
+  session: {
+    style: {
+      font-size: 26
+      multiple: true
+    }
+  }
+  password: {
+    style: {
+      font-size: 26
+      multiple: true
+    }
+  }
+  authentication: {
+    style: {
+      font-size: 26
+      multiple: true
+    }
+  }
+}
+
+sshd.PAM.library -> pam_modules.account: {class: account}
+sshd.PAM.library -> pam_modules.authentication: {class: auth}
+sshd.PAM.library -> pam_modules.password: {class: password}
+sshd.PAM.library -> pam_modules.session: {class: session}

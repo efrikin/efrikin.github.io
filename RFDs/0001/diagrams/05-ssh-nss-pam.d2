@@ -1,0 +1,156 @@
+shape: sequence_diagram
+vars: {
+  d2-config: {
+    theme-id: 200
+  }
+}
+
+style: {
+  fill: transparent
+}
+
+classes: {
+  font: {
+    style: {
+      font-size: 32
+      font-color: white
+    }
+  }
+  normal: {
+    style: {
+      font-size: 32
+      stroke: green
+      animated: true
+      fill: green
+      font-color: white
+      border-radius: 22
+    }
+  }
+  additional: {
+    style: {
+      font-size: 32
+      fill: "#FFD6A7"
+      font-color: black
+      border-radius: 30
+    }
+  }
+  exception: {
+    style: {
+      font-color: black
+      font-size: 32
+      fill: "#FE7070"
+      border-radius: 25
+    }
+  }
+}
+
+ssh_client: SSH Client {
+  style: {
+    fill: transparent
+    font-size: 40
+    border-radius: 3
+  }
+}
+
+ssh_server: SSH Server {
+  style: {
+    fill: transparent
+    font-size: 40
+    border-radius: 3
+  }
+}
+
+nss: NSS {
+  style: {
+    fill: transparent
+    font-size: 40
+    border-radius: 3
+  }
+}
+
+pam: PAM {
+  style: {
+    fill: transparent
+    font-size: 40
+    border-radius: 3
+  }
+}
+
+ssh_client -> ssh_server.connect: SSH_MSG_USERAUTH_REQUEST {
+  class: normal
+  style: {
+    font-size: 28
+  }
+}
+ssh_server."According to settings in the /etc/nsswitch.conf NSS\nlook up user the each data source. On this step the\ncustom NSS module must create a new user and\nreturn NSS_STATUS_SUCCESS if username \nmatches the requirement": {class: font}
+ssh_server.connect -> nss.request: Request NSS {class: normal}
+"is not valid": {
+  class: exception
+  nss.request.failure -> ssh_server.connect: NSS_STATUS_NOTFOUND {
+    class: exception
+    style: {
+      stroke: white
+      font-color: white
+    }
+  }
+  ssh_server.connect.nss_failure -> ssh_client: SSH_MSG_USERAUTH_FAILURE\nAuthentication method list (optional) {
+    class: exception
+    style: {
+      stroke: white
+      font-color: white
+    }
+  }
+}
+nss.request.response -> ssh_server.connect: 2. NSS_STATUS_SUCCESS {class: normal}
+ssh_server -> ssh_client: Authentication method list {class: normal}
+ssh_client -> ssh_server.connect: SSH_MSG_USERAUTH_REQUEST\nAuthentication method\nhas been selected {class: normal}
+ssh_server."According to settings in files to the /etc/pam.d PAM\nperforms each module. On this step the custom PAM\nmodule must check SSH_AUTH_INFO_0, get pubkey\nand additional info (e.g. Key ID field) as well as return\nstatus if username, pubkey type, etc. matches the\nrequirement.": {class: font}
+ssh_server.connect -> pam.request: Request PAM {class: normal}
+"is not successful": {
+  class: exception
+  pam.request.failure -> ssh_server.connect: PAM_SESSION_ERR,\nPAM_AUTH_ERR,\n etc. {
+    class: exception
+    style: {
+      stroke: white
+      font-color: white
+    }
+  }
+  ssh_server.connect.pam_failure -> ssh_client: SSH_MSG_USERAUTH_FAILURE {
+    class: exception
+    style: {
+      stroke: white
+      font-color: white
+    }
+  }
+}
+pam.request.success -> ssh_server.connect: PAM_SUCCESS {class: normal}
+"is additional authentication method required": {
+  class: additional
+  ssh_client -- pam: Step(s) related to additional authentication method(s) {
+    class: font
+    style: {
+      stroke: white
+    }
+  }
+}
+ssh_server.connect -> ssh_client: SSH_MSG_USERAUTH_SUCCESS {class: normal}
+
+ssh_client -- pam: Session has been opened {
+  class: font
+  style: {
+    font-color: white
+    stroke-dash: 3
+    stroke: white
+  }
+}
+
+ssh_client -> ssh_server.request.session_terminate: Session terminate {class: normal}
+ssh_server.request.session_terminate -> pam: Session will be closed {class: normal}
+pam -> pam: Some actions {
+  class: font
+  style: {
+    stroke: white
+  }
+}
+pam -> ssh_server.request.session_terminate: Sucessfully {class: normal}
+ssh_server.request.session_terminate -> ssh_client: Session has been closed {class: normal}

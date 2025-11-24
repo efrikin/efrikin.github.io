@@ -1,0 +1,56 @@
+shape: sequence_diagram
+vars: {
+  d2-config: {
+    theme-id: 200
+  }
+}
+style: {
+  fill: transparent
+}
+classes: {
+  default: {
+    style: {
+      font-size: 32
+      border-radius: 30
+    }
+  }
+  conn: {
+    style: {
+      font-size: 32
+      fill: "green"
+      font-color: white
+      border-radius: 30
+      animated: true
+      stroke: green
+    }
+  }
+}
+
+ssh_client: SSH Client {
+  style: {
+    fill: transparent
+    font-size: 40
+    border-radius: 3
+  }
+}
+ca: Certificate Authority {
+  style: {
+    fill: transparent
+    font-size: 40
+    border-radius: 3
+  }
+}
+ssh_server: SSH Server {
+  style: {
+    fill: transparent
+    font-size: 40
+    border-radius: 3
+  }
+}
+
+ssh_client -> ca.request: send SSH certificate {class: conn}
+ca."Generate short-lived certificate": {class: default}
+ca.request.response -> ssh_client: Certificate\nhas been\ngenerated {class: conn}
+ssh_client -> ssh_server.connect: SSH authentication by certificate {class: conn}
+ssh_server."Validate certificate by CA": {class: default}
+ssh_server.connect.established -> ssh_client: SSH authentication has been successful {class: conn}

@@ -1,0 +1,101 @@
+shape: sequence_diagram
+vars: {
+  d2-config: {
+    theme-id: 200
+  }
+}
+
+style: {
+  fill: transparent
+}
+
+classes: {
+  priv: {
+    style: {
+      fill: yellow
+      border-radius: 30
+      stroke: black
+    }
+  }
+
+  font: {
+    style: {
+      font-size: 32
+      font-color: white
+    }
+  }
+
+  normal: {
+    style: {
+      font-size: 32
+      stroke: green
+      animated: true
+      fill: green
+      font-color: white
+      border-radius: 30
+    }
+  }
+  additional: {
+    style: {
+      font-size: 32
+      fill: "#FFD6A7"
+      font-color: black
+      border-radius: 30
+      font-color: black
+    }
+  }
+  exception: {
+    style: {
+      fill: "#FE7070"
+      border-radius: 25
+      font-size: 32
+      font-color: black
+    }
+  }
+}
+
+ssh_client: SSH Client {
+  style: {
+    fill: transparent
+    border-radius: 3
+    font-size: 40
+  }
+}
+
+ssh_server: SSH Server {
+  style: {
+    fill: transparent
+    border-radius: 3
+    font-size: 40
+  }
+}
+
+"stage1": "" {
+  class: priv
+  ssh_client -- ssh_server: TCP connection has been established {class: font}
+  ssh_client -- ssh_server: SSH key exchange has been done {class: font}
+  ssh_client -- ssh_server: SSH_MSG_SERVICE_REQUEST has been sent {class: font}
+}
+
+ssh_client -> ssh_server: SSH_MSG_USERAUTH_REQUEST {class: normal}
+"is the user invalid": {
+  class: exception
+  ssh_server -> ssh_client: SSH_MSG_USERAUTH_FAILURE\nAuthentication method list(optional) {
+    class: font
+    style: {
+      stroke: white
+    }
+  }
+}
+ssh_server -> ssh_client: Authentication method list {class: normal}
+ssh_client -> ssh_server: SSH_MSG_USERAUTH_REQUEST\n+\nAuthentication method has been selected {class: normal}
+"is additional an authentication method(s) required": {
+  class: additional
+  ssh_client -- ssh_server: Step(s) related to additional authentication method(s) {
+    class: font
+    style: {
+      stroke: white
+    }
+  }
+}
+ssh_server -> ssh_client: SSH_MSG_USERAUTH_SUCCESS {class: normal}

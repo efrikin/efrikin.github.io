@@ -1,0 +1,170 @@
+vars: {
+  d2-config: {
+    theme-id: 200
+    layout-engine: elk
+  }
+}
+
+style: {
+  fill: transparent
+}
+
+classes: {
+  default: {
+    style: {
+      animated: true
+      font-size: 36
+    }
+  }
+  password: {
+    style: {
+      animated: true
+      stroke: fuchsia
+    }
+  }
+  rpc: {
+    style: {
+      animated: true
+      stroke: yellow
+    }
+  }
+  networks: {
+    style: {
+      animated: true
+      stroke: lime
+    }
+  }
+  group: {
+    style: {
+      animated: true
+      stroke: aqua
+    }
+  }
+  response: {
+    style: {
+      animated: true
+      stroke: orange
+      font-size: 36
+    }
+  }
+}
+
+direction: right
+
+sshd: "sshd process" {
+  style: {
+    font-size: 50
+    fill: transparent
+  }
+  ssh_server: SSH Server {
+    style: {
+      font-size: 40
+      fill: transparent
+    }
+  }
+  NSS: {
+    style: {
+      font-size: 40
+      fill: transparent
+    }
+    library: {
+      style: {
+        multiple: true
+        font-size: 32
+      }
+    }
+  }
+  nss_config -> NSS
+  ssh_server -> NSS: 1. Look up user {
+    class: default
+    style: {
+      stroke: orange
+    }
+  }
+  ssh_server <- NSS: 2. Response {class: response}
+  nss_config: /etc/nsswitch.conf {
+    style: {
+      font-size: 32
+      fill: transparent
+    }
+  }
+}
+
+ds: "Data Sources" {
+  style: {
+    # multiple: true
+    font-size: 50
+    fill: transparent
+  }
+  password: {
+    style: {
+      font-size: 40
+      fill: transparent
+    }
+  }
+  password.files: {
+    style: {
+      font-size: 32
+      fill: transparent
+    }
+  }
+  password.systemd: {
+    style: {
+      font-size: 32
+      fill: transparent
+    }
+  }
+  group: {
+    style: {
+      font-size: 40
+      fill: transparent
+    }
+  }
+  group.files: {
+    style: {
+      font-size: 32
+      fill: transparent
+    }
+  }
+  group.systemd: {
+    style: {
+      font-size: 32
+      fill: transparent
+    }
+  }
+  networks: {
+    style: {
+      font-size: 40
+      fill: transparent
+    }
+  }
+  networks.dns: {
+    style: {
+      font-size: 32
+      fill: transparent
+    }
+  }
+  networks.files: {
+    style: {
+      font-size: 32
+      fill: transparent
+    }
+  }
+  rpc: {
+    style: {
+      font-size: 40
+      fill: transparent
+    }
+  }
+  rpc.files: {
+    style: {
+      font-size: 32
+      fill: transparent
+    }
+  }
+}
+
+sshd.NSS.library -> ds.password: {class: password}
+sshd.NSS.library -> ds.group: {class: group}
+sshd.NSS.library -> ds.networks: {class: networks}
+sshd.NSS.library -> ds.rpc: {class: rpc}

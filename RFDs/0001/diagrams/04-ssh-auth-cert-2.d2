@@ -1,0 +1,91 @@
+shape: sequence_diagram
+vars: {
+  d2-config: {
+    theme-id: 200
+  }
+}
+
+style: {
+  fill: transparent
+}
+
+classes: {
+  priv: {
+    style: {
+      fill: yellow
+      border-radius: 30
+      stroke: black
+    }
+  }
+  font: {
+    style: {
+      font-size: 32
+      font-color: white
+    }
+  }
+  normal: {
+    style: {
+      font-size: 32
+      stroke: green
+      animated: true
+      fill: green
+      font-color: white
+      border-radius: 30
+    }
+  }
+  exception: {
+    style: {
+      font-color: black
+      font-size: 32
+      fill: "#FE7070"
+      border-radius: 25
+    }
+  }
+}
+
+ssh_client: {
+  label: SSH Client
+  style: {
+    fill: transparent
+    font-size: 40
+    border-radius: 3
+  }
+}
+
+ssh_server: {
+  label: SSH Server
+  style: {
+    fill: transparent
+    font-size: 40
+    border-radius: 3
+  }
+}
+
+"stage1": "" {
+  class: priv
+  ssh_client -- ssh_server: TCP connection has been established {class: font}
+  ssh_client -- ssh_server: SSH key exchange has been done {class: font}
+  ssh_client -- ssh_server: SSH_MSG_SERVICE_REQUEST has been sent {class: font}
+  ssh_client -- ssh_server: Authentication method has been selected {class: font}
+}
+ssh_client -> ssh_server.validate: Send SSH certificate signed by CA {class: normal}
+ssh_server."validate SSH certificate": {
+  style: {
+    font-size: 32
+  }
+}
+ssh_server.validate -> ssh_server: Certificate\nAuthority {class: font}
+ssh_server.validate -> ssh_server: Expiration\ndate {class: font}
+ssh_server.validate -> ssh_server: Principals {class: font}
+ssh_server.validate -> ssh_server: etc. {class: font}
+"is not valid": {
+  class: exception
+  ssh_server.validate -> ssh_client: SSH_MSG_USERAUTH_FAILURE {
+    class: exception
+    style: {
+      stroke: white
+      font-color: white
+    }
+  }
+}
+ssh_server.validate -> ssh_client: SSH_MSG_USERAUTH_SUCCESS {class: normal}

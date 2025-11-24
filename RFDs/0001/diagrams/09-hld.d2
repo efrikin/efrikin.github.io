@@ -1,0 +1,91 @@
+direction: right
+vars: {
+  d2-config: {
+    theme-id: 200
+  }
+}
+
+style: {
+  fill: transparent
+}
+
+classes: {
+  default: {
+    style: {
+      font-size: 32
+      stroke: green
+      animated: true
+      font-color: white
+    }
+  }
+  font: {
+    style: {
+      font-size: 32
+      font-color: white
+    }
+  }
+}
+
+ssh_clients: SSH clients {
+  style: {
+    font-size: 40
+  }
+  shape: image
+  icon: https://icons.terrastruct.com/essentials%2F359-users.svg
+  width: 250
+  height: 200
+}
+
+cert_manager: "Certificate Manager" {
+  label.near: outside-bottom-center
+  style: {
+    stroke-dash: 3
+    font-size: 35
+    fill: transparent
+  }
+  ca_pubkey: "" {
+    shape: image
+    icon: https://icons.terrastruct.com/aws%2FInternet%20of%20Things%2FIoT_Certificate-manager_light-bg.svg
+  }
+}
+
+cert_manager <- hosts: Get CA certificate {
+  class: font
+}
+
+ssh_clients -> cert_manager: 1. public key {
+  class: default
+  icon: https://icons.terrastruct.com/essentials%2F216-key.svg
+}
+
+cert_manager -> ssh_clients: 2.OpenSSH\ncertificate {
+  class: default
+  icon: https://icons.terrastruct.com/azure%2FWeb%20Service%20Color%2FApp%20Service%20Certificates.svg
+}
+
+ssh_clients -> hosts: 3. Authentication by Certificate {
+  class: default
+  icon: https://icons.terrastruct.com/azure%2FWeb%20Service%20Color%2FApp%20Service%20Certificates.svg
+}
+
+hosts: "Hosts" {
+  style: {
+    multiple: true
+    stroke-dash: 3
+    fill: transparent
+    font-size: 40
+  }
+  label.near: outside-bottom-center
+  grid-rows: 3
+  break-glass: "" {
+    shape: image
+    icon: https://blog.evgenii.us/RFDs/0001/images/logo.svg
+    height: 110
+  }
+  host: "" {
+    shape: image
+    icon: https://icons.terrastruct.com/essentials%2F112-server.svg
+    width: 200
+    height: 300
+  }
+}

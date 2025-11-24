@@ -13,11 +13,21 @@ label:
   - ssh
   - break-glass
 link:
-  - "[#2](https://github.com/efrikin/rfds/pull/2){target=_blank}"
-  - "[#3](https://github.com/efrikin/rfds/pull/3){target=_blank}"
-  - "[#4](https://github.com/efrikin/rfds/pull/4){target=_blank}"
-  - "[#5](https://github.com/efrikin/rfds/pull/5){target=_blank}"
+  - "[#2](https://github.com/efrikin/rfds/pull/2){target=_blank_}"
+  - "[#3](https://github.com/efrikin/rfds/pull/3){target=_blank_}"
+  - "[#4](https://github.com/efrikin/rfds/pull/4){target=_blank_}"
+  - "[#5](https://github.com/efrikin/rfds/pull/5){target=_blank_}"
+  - "[#6](https://github.com/efrikin/rfds/pull/6){target=_blank_}"
+  - "[#7](https://github.com/efrikin/rfds/pull/7){target=_blank_}"
 open-graph: true
+filters:
+  - d2
+d2:
+  layout: elk
+  theme: DarkMauve
+  embed_mode: link
+  pad: 10
+  folder: diagrams/rendered
 # draft: true
 ---
 
@@ -152,12 +162,10 @@ It is designed as three protocols that typically run-on top of TCP:
 - `SSH Connection Protocol` is responsible for multiplexing the encrypted tunnel
   into several logical channel
 
-```{mermaid}
-%%| label: fig-ssh-stack
-%%| fig-align: center
-%%| fig-cap: "SSH stack protocol"
-%%| file: diagrams/01-ssh-stack-protocols.mmd
+```{.d2 file=diagrams/01-ssh-stack-protocols.d2 width=0%}
 ```
+
+![SSH stack protocol](diagrams/rendered/diagram-1.svg){fig-caption="SSH stack protocol" fig-align="center" width=70% #fig-ssh-stack}
 
 The last step in the `SSH Transport Layer Protocol` is service request. A client
 sends an `SSH_MSG_SERVICE_REQUEST` to request the
@@ -174,12 +182,10 @@ authentication request MUST NOT be accepted.
 
 [^rfc4252]: [RFC4252: Authentication Requests](https://datatracker.ietf.org/doc/html/rfc4252#section-5)
 
-```{mermaid}
-%%| label: fig-sshd-nss
-%%| fig-align: center
-%%| fig-cap: "Conversation between sshd and NSS"
-%%| file: diagrams/08-sshd-nss.mmd
+```{.d2 file="diagrams/08-sshd-nss.d2" width=0%}
 ```
+
+![Conversation between sshd and NSS](diagrams/rendered/diagram-2.svg){fig-caption="Conversation between sshd and NSS" fig-align="center" width=80% #fig-sshd-nss}
 
 That's why it's necessary to consider `SSH User Authentication Protocol` in a
 more detailed way. It performs the following functions:
@@ -200,12 +206,9 @@ more detailed way. It performs the following functions:
 5. when all required authentication methods succeed the server sends a
    `SSH_MSG_USERAUTH_SUCCESS` message.
 
-```{mermaid}
-%%| label: fig-ssh-auth
-%%| fig-align: center
-%%| fig-cap: "SSH User Authentication protocol"
-%%| file: diagrams/02-ssh-auth.mmd
+```{.d2 file="diagrams/02-ssh-auth.d2" width=0%}
 ```
+![SSH User Authentication protocol](diagrams/rendered/diagram-3.svg){fig-caption="SSH User Authentication protocol" fig-align="center" width=70% #fig-ssh-auth}
 
 The server may require one or more of the following authentication methods:
 
@@ -213,12 +216,10 @@ The server may require one or more of the following authentication methods:
 - Password
 - Host-based
 
-```{mermaid}
-%%| label: fig-ssh-auth-cert-1
-%%| fig-align: center
-%%| fig-cap: "SSH Authentication by Certificate "
-%%| file: diagrams/03-ssh-auth-cert-1.mmd
+```{.d2 file="diagrams/03-ssh-auth-cert-1.d2" width=0%}
 ```
+
+![SSH Authentication by Certificate](diagrams/rendered/diagram-4.svg){fig-caption="SSH Authentication by Certificate" fig-align="center" width=70% #fig-ssh-auth-cert-1}
 
 `Certificate-based` authentication is an extension of public key authentication
 where there is CA role for enhancement security. It uses three main components:
@@ -239,12 +240,10 @@ a private key, a public key, and a certificate signed by the CA.
 6. when all required authentication methods succeed the server sends a
    `SSH_MSG_USERAUTH_SUCCESS` message
 
-```{mermaid}
-%%| label: fig-ssh-auth-cert-2
-%%| fig-align: center
-%%| fig-cap: "SSH Authentication by Certificate"
-%%| file: diagrams/04-ssh-auth-cert-2.mmd
+```{.d2 file="diagrams/04-ssh-auth-cert-2.d2" width="0%"}
 ```
+
+![SSH Authentication by Certificate](diagrams/rendered/diagram-5.svg){fig-caption="SSH Authentication by Certificate" fig-align="center" width=50% #fig-ssh-auth-cert-2}
 
 According to `Problem Statement` section it's necessary to pay attention on
 second and last phases in the certificate-based authentication. So, if
@@ -268,10 +267,10 @@ server. Session is opened after all `Linux Pluggable Authentication` (PAM)
 verification. In order to configure user's session it's necessary to implement
 custom PAM module and configure it in one of files in the `/etc/pam.d`.
 During performing PAM stage some environment variables will be defined. One of
-them is `SSH_AUTH_INFO_0`.[^ssh-auth-info] It exposes authentication information to PAM module
-(e.g. pubkey, certificate, etc.). This variable can be used as source for
-making decisions during authorization process (e.g. assigning sudo group to
-user).
+them is `SSH_AUTH_INFO_0`.[^ssh-auth-info] It exposes authentication
+information to PAM module (e.g. pubkey, certificate, etc.). This variable can
+be used as source for making decisions during authorization process (e.g.
+assigning sudo group to user).
 
 [^ssh-auth-info]: [openssh-portable/auth-pam.c](https://github.com/openssh/openssh-portable/blob/953fa5b59afb04c3c74ed82d7bace65c13cd8baa/auth-pam.c#L778-L796)
 
@@ -289,13 +288,10 @@ role to password authentication`, you should disable either
 
 [^sshd-config-usepam]: man 5 sshd_config
 
-
-```{mermaid}
-%%| label: fig-sshd-nss-pam
-%%| fig-align: center
-%%| fig-cap: "Conversation between sshd, NSS and PAM"
-%%| file: diagrams/07-sshd-nss-pam.mmd
+```{.d2 file="diagrams/07-sshd-nss-pam.d2" width=0%}
 ```
+
+![Conversation between sshd, NSS and PAM](diagrams/rendered/diagram-6.svg){fig-caption="Conversation between sshd, NSS and PAM" fig-align="center" #fig-sshd-nss-pam}
 
 ::: {.callout-tip title="Alternative way"}
 One of the ways to get authentication information during ssh connection it's
@@ -316,22 +312,21 @@ When session is closed PAM module must perform the following actions:
 
 Thus, all users is temporary
 
-```{mermaid}
-%%| label: fig-ssh-nss-pam
-%%| fig-align: center
-%%| fig-cap: Using NSS and PAM by SSH server
-%%| file: diagrams/05-ssh-nss-pam.mmd
+```{.d2 file="diagrams/05-ssh-nss-pam.d2" width=0%}
 ```
 
-### HLD [^HLD]
+![Using NSS and PAM by SSH server](diagrams/rendered/diagram-7.svg){fig-caption="Using NSS and PAM by SSH server" fig-align="center" width=70% #fig-ssh-nss-pam }
 
-![High Level Design](images/bg-hld.svg){fig-align="center" #bg-hld}
+### HLD
 
-[^HLD]: [Fortanix Data Security Manager](https://www.fortanix.com/resources/solution-briefs/fortanix-dsm-ssh-ca)
+```{.d2 file="diagrams/09-hld.d2" width=0%}
+```
+
+![High Level Design](diagrams/rendered/diagram-8.svg){fig-align="center" #bg-hld}
 
 ### Naming convention
 
-#### `Key ID` field
+#### Key ID field
 
 `Key ID` field usually contains policy name which describes access level on
 hosts. It makes audit logs more detailed.
@@ -354,10 +349,10 @@ must be defined as `::`. The `::` expands as `ssh_v1:!:users` by default.
 
 ### Minimum requirements
 
-[OpenSSH >= `7.6p1`](https://www.openssh.com/txt/release-7.6){target=_blank}
+[OpenSSH >= `7.6p1`](https://www.openssh.com/txt/release-7.6){target=_blank_}
 (has been tested on `Fedora 41 and OpenSSH 9.8p1`)
 
-```conf
+````bash
 Port 1110 # <1>
 UsePAM yes
 Match LocalPort 1110
@@ -365,7 +360,7 @@ Match LocalPort 1110
        AuthenticationMethods publickey
        PAMServiceName brkgl2s
 Match All
-```
+````
 
 1. _Add to /etc/ssh/sshd_config.d/00-break-glass.conf_
 
@@ -417,12 +412,10 @@ implemented function for getting a PAM service name.
 
 [^proc-pid-comm]: man 5 proc_pid_comm
 
-```{mermaid}
-%%| label: fig-ssh-nss-pam-custom
-%%| fig-align: center
-%%| fig-cap: Using custom NSS and PAM by SSH server
-%%| file: diagrams/06-ssh-nss-pam-custom.mmd
+```{.d2 file="diagrams/06-ssh-nss-pam-custom.d2" width=0%}
 ```
+
+![Using custom NSS and PAM by SSH server](diagrams/rendered/diagram-9.svg){fig-caption="Using custom NSS and PAM by SSH server" fig-align="center" width=70% #fig-ssh-nss-pam-custom}
 
 #### Checking username
 
@@ -456,7 +449,7 @@ easily.
 
 ## Details of implementation
 
-### `get_pubkey_info` function
+### get_pubkey_info function
 
 There is a reason why `get_pubkey_info` function was implemented via `execvp`
 and `pipe`. The thing is that libraries such as `libssh` and `libssh2` don't
@@ -473,13 +466,13 @@ The parent process reads from `stdin` and sends to `ssh -L -f-` command.
 It looks like this `cat pubkey | ssh -L -f-` command in shell interpreter.
 Next, the parent process looks up some fields and saves into a structure.
 
-### `adduser` function
+### adduser function
 
 During user account creation instead of real password is used `!` char.
 According to `man 5 shadow`:[^man_shadow]
 
 > If the password field contains some string that is not a valid result of
-`crypt(3)`, for instance ! or *, the user will not be able to use a unix
+`crypt(3)`, for instance ! or \*, the user will not be able to use a unix
 password to log in (but the user may log in the system by other means).
 
 [^man_shadow]: man 5 shadow
@@ -492,11 +485,11 @@ entries in the `/etc/shadow` and use `x` char instead of password in the
 
 ## References
 
-- [wh0: The SSH Protocol](https://wh0.github.io/2018/02/27/ssh-protocol.html){target=_blank}
-- [Teleport: SSH Certificates Security](https://goteleport.com/blog/ssh-certificates/){target=_blank}
-- [Using certificates for SSH authentication](https://lwn.net/Articles/913971/){target=_blank}
-- [Netburner: Introduction to the SSH Protocol](https://www.netburner.com/learn/introduction-to-the-ssh-protocol/){target=_blank}
-- [SecureW2: How Does SSH Certificate Authentication Work?](https://www.securew2.com/blog/how-does-ssh-certificate-authentication-work){target=_blank}
-- [NISTIR 7966: Security of Interactive and Automated Access Management Using SSH](https://nvlpubs.nist.gov/nistpubs/ir/2015/nist.ir.7966.pdf){target=_blank}
-- [Cloudflare: Fearless SSH: short-lived certificates bring Zero Trust to infrastructure](https://blog.cloudflare.com/intro-access-for-infrastructure-ssh/){target=_blank}
+- [wh0: The SSH Protocol](https://wh0.github.io/2018/02/27/ssh-protocol.html){target=_blank_}
+- [Teleport: SSH Certificates Security](https://goteleport.com/blog/ssh-certificates/){target=_blank_}
+- [Using certificates for SSH authentication](https://lwn.net/Articles/913971/){target=_blank_}
+- [Netburner: Introduction to the SSH Protocol](https://www.netburner.com/learn/introduction-to-the-ssh-protocol/){target=_blank_}
+- [SecureW2: How Does SSH Certificate Authentication Work?](https://www.securew2.com/blog/how-does-ssh-certificate-authentication-work){target=_blank_}
+- [NISTIR 7966: Security of Interactive and Automated Access Management Using SSH](https://nvlpubs.nist.gov/nistpubs/ir/2015/nist.ir.7966.pdf){target=_blank_}
+- [Cloudflare: Fearless SSH: short-lived certificates bring Zero Trust to infrastructure](https://blog.cloudflare.com/intro-access-for-infrastructure-ssh/){target=_blank_}
 

@@ -1,0 +1,148 @@
+shape: sequence_diagram
+vars: {
+  d2-config: {
+    theme-id: 200
+  }
+}
+style: {
+  fill: transparent
+}
+classes: {
+  font: {
+    style: {
+      font-size: 22
+      font-color: white
+    }
+  }
+  normal: {
+    style: {
+      font-size: 22
+      stroke: green
+      animated: true
+      fill: green
+      font-color: white
+      border-radius: 22
+    }
+  }
+  additional: {
+    style: {
+      font-size: 32
+      font-color: black
+      fill: "#FFD6A7"
+      border-radius: 30
+    }
+  }
+  exception: {
+    style: {
+      font-color: black
+      font-size: 32
+      fill: "#FE7070"
+      border-radius: 25
+    }
+  }
+}
+
+ssh_server: SSH Server {
+  style: {
+    fill: transparent
+
+    font-size: 40
+    border-radius: 3
+  }
+}
+
+nss: NSS {
+  style: {
+    fill: transparent
+
+    font-size: 40
+    border-radius: 3
+  }
+}
+
+pam: PAM {
+  style: {
+    fill: transparent
+
+    font-size: 40
+    border-radius: 3
+  }
+}
+
+ssh_server -> nss.request: Request NSS {
+  class: normal
+  style: {
+    font-size: 22
+  }
+}
+
+"is user not found": {
+  class: additional
+  ssh_server -- nss.request: On this step NSS module gets PID from\nSYSTED_EXEC_PID and looks up process\nname in /proc/PID/comm {
+    class: additional
+    style: {
+      stroke: white
+    }
+  }
+}
+
+"calling process is not ssh": {
+  class: exception
+  nss.request -> ssh_server: NSS_STATUS_TRYAGAIN {
+    class: exception
+    style: {
+      stroke: white
+      font-color: white
+    }
+  }
+}
+
+"username does not contain postfix": {
+  class: exception
+  nss.request -> ssh_server: NSS_STATUS_TRYAGAIN {
+    class: exception
+    style: {
+      stroke: white
+      font-color: white
+    }
+  }
+}
+
+nss.request -> nss.request: Create user {
+  class: font
+  # style: {
+  #   font-color: white
+  # }
+}
+nss.request.success -> ssh_server: NSS_STATUS_SUCCESS {
+  class: normal
+  style: {
+    font-color: white
+  }
+}
+
+ssh_server -- pam: {
+  style: {
+    stroke-dash: 3
+    stroke: white
+  }
+}
+
+ssh_server -> pam.request: Request PAM {class: normal}
+pam.request -> pam.request: looks up pubkey\ninto SSH_AUTH_INFO_0 {class: font}
+
+pam.request -> pam.request: looks up pubkey\nkey type and get KeyID {class: font}
+
+pam.request -> pam.request: Create sudoerr file {class: font}
+
+"not successfull": {
+  class: exception
+  pam.request -> ssh_server: PAM_SESSION_ERR, PAM_AUTH_ERR, etc. {
+    class: font
+    style: {
+      stroke: white
+      font-color: white
+    }
+  }
+}
+pam.request -> ssh_server: PAM_SUCCESS {class: normal}
