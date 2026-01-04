@@ -15,11 +15,11 @@ execute:
 metadata-files:
   - RFDs/_quarto.local.yaml
 
+pagetitle: "{{< meta authorname >}}'s Blog"
 title-meta: "{{< meta authorname >}}"
 description-meta: "{{< meta authorname >}} Personal blog My Reflection"
 
 website:
-  title: "Evgenii Frikin's Blog"
   description: "Personal blog"
   # favicon: images/favicon.png
   site-url: "https://blog.evgenii.us"

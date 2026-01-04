@@ -1,5 +1,5 @@
 ---
-# title: Posts
+pagetitle: Posts
 listing:
   # contents:
   sort: "date desc"

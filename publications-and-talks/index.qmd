@@ -1,5 +1,5 @@
 ---
-# title: Publications&Talks
+pagetitle: Publications&Talks
 listing:
   contents:
     - index.yaml

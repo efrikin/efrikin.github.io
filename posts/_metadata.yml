@@ -1,4 +1,5 @@
 freeze: true
+pagetitle: "{{< meta title >}}"
 title-block-banner: true
 page-layout: full
 
