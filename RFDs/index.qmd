@@ -1,4 +1,5 @@
 ---
+pagetitle: RFD(s)
 listing:
   # contents:
   sort: "date desc"
