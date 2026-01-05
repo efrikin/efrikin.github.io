@@ -11,19 +11,14 @@ listing:
     - image
     - categories
     - descriptions
+    - links
   categories: false
   sort-ui: false
   filter-ui: false
-  id: additional-list
 page-layout: full
 title-block-banner: false
 execute:
   echo: false
 ---
-
-::: {#additional-list}
-:::
-
-[Slides](https://blog.evgenii.us/devopsconf2021) for «Kubernetes cluster. Testing Performance and Scalability»
 
 <!-- # [PUBLICATIONS]{.second-color} -->

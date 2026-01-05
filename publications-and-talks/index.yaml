@@ -8,6 +8,8 @@
     - Kubernetes
     - clusterloader2
     - kubemark
+  links: |
+    [Slides](https://blog.evgenii.us/devopsconf2021)
 - title: "How to troubleshoot IPsec VPN misconfigurations"
   descriptions: Article
   date: 2022-12-14
@@ -28,3 +30,25 @@
     - GitLab
     - Tests
     - DZone
+- title: |
+    EN|Refine the «Break-Glass»
+  descriptions: Presentation
+  date: 2025-05-23
+  path: https://www.youtube.com/watch?v=GFytCl77Onk
+  image:
+  categories:
+    - Break-Glass
+    - Zero Trust
+    - Passwordless
+    - Keyless
+    - Accountless
+    - Just-in-Time
+    - Security
+    - SSH
+    - PAM
+    - NSS
+    - phd
+  links: |
+    [RU|Talk](https://phdays.com/en/forum/broadcast/?talk=2333&selectedDate=2025%2F5%2F23&selectedTagSlug=infrastruktura&talk-id=2333)<br>
+    [Slides](https://makrushind.github.io/refine-the-break-glass/#/title-slide)<br>
+    [Slides(Mirror)](https://blog.evgenii.us/refine-the-break-glass/#/title-slide)<br>
